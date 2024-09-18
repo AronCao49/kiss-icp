@@ -30,7 +30,7 @@ import numpy as np
 
 
 class NuScenesDataset:
-    def __init__(self, data_dir: Path, sequence: str, *_, **__):
+    def __init__(self, data_dir: Path, sequence: str, nusc=None, *_, **__):
         try:
             importlib.import_module("nuscenes")
         except ModuleNotFoundError:
@@ -51,7 +51,12 @@ class NuScenesDataset:
 
         self.sequence_id = str(sequence).zfill(4)
 
-        self.nusc = NuScenes(dataroot=str(data_dir), version=nusc_version)
+        # init nusc if None
+        if nusc is None:
+            self.nusc = NuScenes(dataroot=str(data_dir), version=nusc_version)
+        else:
+            self.nusc = nusc
+
         self.scene_name = f"scene-{self.sequence_id}"
         if self.scene_name not in [s["name"] for s in self.nusc.scene]:
             print(f'[ERROR] Sequence "{self.sequence_id}" not available scenes')
@@ -64,11 +69,17 @@ class NuScenesDataset:
             "nuscenes.utils.data_classes"
         ).LidarPointCloud.from_file
 
-        # Get assignment of scenes to splits.
-        split_logs = create_splits_logs(split, self.nusc)
+        if nusc is None:
+            # Get assignment of scenes to splits.
+            split_logs = create_splits_logs(split, self.nusc)
+            # Use only the samples from the current split.
+            scene_token = self._get_scene_token(split_logs)
+        else:
+            # Directly get scene token, ignoring split logs
+            scene_tokens = [s["token"] for s in self.nusc.scene if s["name"] == self.scene_name][0]
+            scene = self.nusc.get("scene", scene_tokens)
+            scene_token = scene["token"]
 
-        # Use only the samples from the current split.
-        scene_token = self._get_scene_token(split_logs)
         self.lidar_tokens = self._get_lidar_tokens(scene_token)
         self.gt_poses = self._load_poses()
 

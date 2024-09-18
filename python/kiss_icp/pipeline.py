@@ -48,6 +48,7 @@ class OdometryPipeline:
         visualize: bool = False,
         n_scans: int = -1,
         jump: int = 0,
+        out_dir: str = ''
     ):
         self._dataset = dataset
         self._n_scans = (
@@ -83,6 +84,9 @@ class OdometryPipeline:
         }
         if hasattr(self._dataset, "use_global_visualizer"):
             self.visualizer._global_view = self._dataset.use_global_visualizer
+            
+        # newly addedd out_dir
+        self.out_dir = out_dir
 
     # Public interface  ------
     def run(self):
@@ -226,4 +230,8 @@ class OdometryPipeline:
         return results_dir
 
     def _create_output_dir(self):
-        self.results_dir = self._get_results_dir(self.config.out_dir)
+        # update 
+        if self.out_dir is not None:
+            self.results_dir = self._get_results_dir(self.config.out_dir)
+        else:
+            self.results_dir = self._get_results_dir(self.out_dir)
