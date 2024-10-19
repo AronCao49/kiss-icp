@@ -232,6 +232,7 @@ class OdometryPipeline:
     def _create_output_dir(self):
         # update 
         if self.out_dir:
-            self.results_dir = self._get_results_dir(self.config.out_dir)
+            self.results_dir = self.out_dir
         else:
-            self.results_dir = self._get_results_dir(self.out_dir)
+            self.results_dir = self._get_results_dir(self.config.out_dir)
+            
