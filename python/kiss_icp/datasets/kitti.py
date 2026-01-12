@@ -37,7 +37,7 @@ class KITTIOdometryDataset:
 
         # Load GT Poses (if available)
         if int(sequence) < 11:
-            self.poses_fn = os.path.join(data_dir, f"poses/{self.sequence_id}.txt")
+            self.poses_fn = os.path.join(self.kitti_sequence_dir, f"poses/{self.sequence_id}.txt")
             self.gt_poses = self.load_poses(self.poses_fn)
 
         # Add correction for KITTI datasets, can be easilty removed if unwanted
